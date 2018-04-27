@@ -14,6 +14,17 @@
 
 ## Requirements
 
+## HOW TO USE
+open two tabs in your CLI
+in one type: npm run start
+in the other for
+* POST--  http POST :3000/api/v1/tree/ title=____ content=______
+* GET-- http GET :3000/api/v1/tree/ title==____ content==______
+* GET ALL-- http GET :3000/api/v1/trees <--- need to refactor?
+* PUT-- <---- not in existance right now
+* DELETE-- http DELETE :3000/api/v1/tree/ title==____ content==______
+
+
 #### Configuration
 * Reference the file structure of [this template](https://github.com/codefellows/seattle-javascript-401d23/tree/master/back-end/00-empty-template) for the configuration files you need and folder structure
 * `README.md`
