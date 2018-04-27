@@ -22,7 +22,7 @@ storage.create = function create(schema, item) {
   if (!schema) return Promise.reject(new Error('Cannot create a new item, schema required'));
   if (!item) return Promise.reject(new Error('Cannot create a new item, item required'));
   const json = JSON.stringify(item);
-  return fs.writeFileProm(`${__dirname}/../data/${schema}/${item.id}.json`, json)
+  return fs.writeFileProm(`${__dirname}/src/../data/${schema}/${item.id}.json`, json)
     .then(() => {
       logger.log(logger.INFO, 'STORAGE: Created a new resource');
       return item;

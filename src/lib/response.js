@@ -5,6 +5,7 @@ const response = module.exports= {};
 response.sendJSON = (res, status, data) => {
   res.writeHead(status, { 'Content-Type': 'application/json' });
   res.write(JSON.stringify(data));// res.write ONLY TAKES STRING OR BUFFER
+  console.log('WHAT IS DATA', data);
   res.end();
   return undefined;
 };

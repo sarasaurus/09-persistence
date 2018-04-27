@@ -4,7 +4,7 @@ const server = require('../lib/server');
 const superagent = require('superagent');
 
 const testPort = 5000;
-const mockResource = { title: 'test title', content: 'test content' };
+const mockResource = { title: 'test title AFTER PERSIST', content: 'test content AFTER PERSIST' };
 const mockResource2 = { title: 'test title 2', content: 'test content 2' };
 const mockBadResource = { title: '', content: '' };
 let mockId = null;

@@ -9,6 +9,6 @@ module.exports = class {
     this.title = title;
     this.content = content;
     this.id = uuid();
-    logger.log(logger.INFO, `TREE: Created a new tree: ${JSON.stringify(this)}`);
+    logger.log(logger.INFO, `TREE: Created a new Tree: ${JSON.stringify(this)}`);
   }
 }
