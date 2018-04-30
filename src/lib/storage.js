@@ -1,28 +1,15 @@
 'use strict';
-//TODO USE BLUSE BIRD
-
 const logger = require('./logger');
+
 const storage = module.exports = {};
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'), { suffix: 'Prom' });
-//const memory = {};
 
-// memory = {
-//   'Trees': {
-//     '1234.567.89': {
-//       'title': 'some title',
-//       'content': 'some content',
-//     }
-//   }
-// }
-
-// schema is the type of resource, in this case tree, and it will just be a 'string' saying this is a tree schema
-// item is an actual object we'll pass in to post a newly created tree
 storage.create = function create(schema, item) {
   if (!schema) return Promise.reject(new Error('Cannot create a new item, schema required'));
   if (!item) return Promise.reject(new Error('Cannot create a new item, item required'));
   const json = JSON.stringify(item);
-  return fs.writeFileProm(`${__dirname}/src/../data/${schema}/${item.id}.json`, json)
+  return fs.writeFileProm(`${__dirname}/../data/${schema}/${item.id}.json`, json)
     .then(() => {
       logger.log(logger.INFO, 'STORAGE: Created a new resource');
       return item;
@@ -31,7 +18,6 @@ storage.create = function create(schema, item) {
 };
 
 storage.fetchOne = function fetchOne(schema, id) {
-  // takes in a schema(so what directory) and id(what item specifically)
   if (!schema) return Promise.reject(new Error('expected schema name'));
   if (!id) return Promise.reject(new Error('expected id'));
 
@@ -45,45 +31,70 @@ storage.fetchOne = function fetchOne(schema, id) {
       }
     })
     .catch((err) => {
-      logger.log(logger.ERROR, JSON.stringify(err));
+      logger.log(logger.ERROR, `${JSON.stringify(err)} in fetchOne storage`);
     });
 };
 
-storage.fetchAll = function fetchAll(schema) {
-  // first need to know how many items in storage then call for each item?
-  // so for each item in memory
-  // gather all promises in array, resolve then return
-  //can this return an array of promises?
-// so: return resolve(array);
-  return new Promise((resolve, reject) => {
-    if (!schema) return reject(new Error('expected schema name'));
-    if (!memory[schema]) return reject(new Error('schema not found'));
-    const idArray = Object.keys(memory[schema]);
-    console.log(idArray);
-    // const all = memory[schema];
-    return resolve(idArray);
-  // return undefined;
-  });
+// TODO: the 'files' I get back from storage.fetchall are just id's-- 
+// some how I need to call fs.readfile on each one, in order to see their content... 
+// ... but I can't figure it out right now
 
+storage.fetchAll = function fetchAll(schema) {
+  if (!schema) return Promise.reject(new Error('expected schema name'));
+  return fs.readdirProm(`${__dirname}/../data/${schema}/`, 'utf8')
+    .then((files) => {
+      try {
+        logger.log(logger.INFO, `FETCHALL in STORAGE, files are: ${files}`);
+        // -------------------------------------------------------------------------------
+        // attempt #1
+        // -------------------------------------------------------------------------------
+        // const infoArray = [];
+        // for (let i = 0; i <= files.length; i++) {
+        //   infoArray.push(fs.readFileAsync(files[i], '', 'utf8'));
+        // }
+        // return Promise.all(infoArray).then(wtf =>
+        //   console.log('WTF is going on with FETCHALL', wtf));
+        // -------------------------------------------------------------------------------
+        // attempt #2
+        // ---------------------------------------------------------------------------------
+        // const infoArray = files.map(path => 
+        //   fs.readFileProm(`${__dirname}/../data/${schema}/${path}`)
+        //     .then((data) => {
+        //       try {
+        //         const item = JSON.parse(data.toString());
+        //         return item;
+        //       } catch (err) {
+        //         return Promise.reject(err);
+        //       }
+        //     }));
+        return files;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    })
+    .catch((err) => {
+      logger.log(logger.ERROR, `${JSON.stringify(err)} in fetchAll, storage`);
+    });
 };
 
 storage.update = function update() {
 
 };
 
-storage.delete = function del(schema, id) {
-  return new Promise((resolve, reject) => {
-    if (!schema) return reject(new Error('expected schema name'));
-    if (!id) return reject(new Error('expected id'));
-    if (!memory[schema]) return reject(new Error('schema not found'));
-    const item = memory[schema][id];
-    if (!item) {
-      return reject(new Error('item not found'));
-    } 
-    delete memory[schema][id];
-    return resolve('deleted');
-    // return undefined;
-  });
-  
-
+storage.del = function del(schema, id) {
+  if (!schema) return Promise.reject(new Error('expected schema name'));
+  if (!id) return Promise.reject(new Error('expected id'));
+  return fs.unlinkProm(`${__dirname}/../data/${schema}/${id}.json`)
+    .then((data) => {
+      try {
+        const item = JSON.parse(data.toString());
+        logger.log(logger.INFO, `${item} deleted in storage.js`);
+        return item;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    })
+    .catch((err) => {
+      logger.log(logger.ERROR, `${JSON.stringify(err)} delete in storage`);
+    });
 };
