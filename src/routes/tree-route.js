@@ -6,10 +6,8 @@ const storage = require('../lib/storage');
 const response = require('../lib/response');
 
 module.exports = function routetree(router) {
-
-
   router.post('/api/v1/tree', (req, res) => {
-    logger.log(logger.INFO, 'TREE-ROUTE: POST /api/v1/tree');
+    // logger.log(logger.INFO, 'TREE-ROUTE: POST /api/v1/tree');
 
     try {
       const newTree = new Tree(req.body.title, req.body.content);
@@ -19,7 +17,7 @@ module.exports = function routetree(router) {
           return undefined;
         });
     } catch (err) {
-      logger.log(logger.ERROR, `TREE-ROUTE: There was a bad request ${err}`);
+      // logger.log(logger.ERROR, `TREE-ROUTE: There was a bad request ${err}`);
       response.sendText(res, 400, err.message);
       return undefined;
     }
@@ -28,19 +26,17 @@ module.exports = function routetree(router) {
 
   router.get('/api/v1/tree', (req, res) => {
     if (!req.url.query.id) {
-      logger.log(logger.INFO, '<----TREE-ROUTE: no id GET /api/v1/tree');
-      console.log('GET ROUTE no id req IS: ', req.body);
-      response.sendText(res, 404, 'Your response requires an id');
+      // logger.log(logger.INFO, '<----TREE-ROUTE: no id GET /api/v1/tree');
+      response.sendText(res, 400, 'Your response requires an id');
       return undefined;
     }
     storage.fetchOne('tree', req.url.query.id)
       .then((item) => {
-        console.log('GET ROUTE no id req stringified IS: ', item);
         response.sendJSON(res, 200, item);
         return undefined;
       })
       .catch((err) => {
-        logger.log(logger.ERROR, err, JSON.stringify(err));
+        logger.log(logger.ERROR, err, `${JSON.stringify(err)} in FetchOne tree-route`);
         response.sendText(res, 404, 'Fetch One: Resource not Found!');
         return undefined;
       });
@@ -48,16 +44,17 @@ module.exports = function routetree(router) {
   });// get one closing brackket
 
   router.get('/api/v1/trees', (req, res) => {
-
     storage.fetchAll('tree')
-      .then((idArray) => {
+    // add the Promise.all(idArray)---> here or below
+      .then((dataArray) => {
         // this seems to be working in CLI
-        console.log('id Array in router is: ', idArray);
-        idArray.forEeach(item => response.sendJSON(res, 200, item));
+        console.log('data Array in router is: ', dataArray);
+        logger.log(logger.INFO, `in fetchAll tree-route ARRAY of DATA: ${dataArray}`);
+        response.sendJSON(res, 200, dataArray);
         return undefined;
       })
       .catch((err) => {
-        logger.log(logger.ERROR, err, JSON.stringify(err));
+        logger.log(logger.ERROR, err, `${JSON.stringify(err)} in fetchAll tree-route`);
         response.sendText(res, 404, 'Fetch All: Resource not Found!');
         return undefined;
       });
@@ -82,20 +79,18 @@ module.exports = function routetree(router) {
   //   return undefined;
   // });
   router.delete('/api/v1/tree', (req, res) => {
-   
     if (!req.url.query.id) {
-      logger.log(logger.INFO, '<----TREE-ROUTE: GET /api/v1/tree');
-      console.log('GET ROUTE req stringified IS: ', req.url.query);
       response.sendText(res, 400, 'Delete: Valid Request Needed!');
       return undefined;
     }
     storage.del('tree', req.url.query.id)
       .then((item) => {
-        response.sendJSON(res, 200, item);
+        logger.log(logger.INFO, item, 'successfully deleted in tree-route');
+        response.sendJSON(res, 204, item);
         return undefined;
       })
       .catch((err) => {
-        logger.log(logger.ERROR, err, JSON.stringify(err));
+        logger.log(logger.ERROR, err, `${JSON.stringify(err)} delete in tree-route`);
         response.sendText(res, 404, 'Delete: Resource not Found!');
         return undefined;
       });

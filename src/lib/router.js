@@ -28,7 +28,7 @@ Router.prototype.put = function put(endpoint, callback) {
 };
 
 Router.prototype.delete = function del(endpoint, callback) {
-  console.log(`Router: DELETE ${endpoint} mounted`)
+  // console.log(`Router: DELETE ${endpoint} mounted`)
   this.routes.DELETE[endpoint] = callback;
 };
 
@@ -39,17 +39,22 @@ Router.prototype.route = function route() {
       bodyParser(req),
     ])
       .then(() => {
+        // req.method is checking for a string equal to the properties defined under this.routes
+        // req.url.pathname ==api/v1/tree
+        // req, res == query string after 
+
         if (typeof this.routes[req.method][req.url.pathname] === 'function') {
           this.routes[req.method][req.url.pathname](req, res);
           return;
         } 
+        // now go to storage
         response.sendText(res, 404, 'Route Not Found FROM ROUTER');
       })
       .catch((err) => {
         if (err instanceof SyntaxError) {
           response.sendText(res, 404, 'Syntax Error from Router');
         }
-        logger.log(logger.ERROR, JSON.stringify(err));
+        logger.log(logger.ERROR, `${JSON.stringify(err)} in router syntax error catch block`);
         response.sendText(res, 404, 'Final Error catch from Router');
       });
   };
